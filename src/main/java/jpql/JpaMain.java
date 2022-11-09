@@ -14,20 +14,24 @@ public class JpaMain {
 
         try {
 
+            Team team = new Team();
+            team.setName("teamA");
+            em.persist(team);
+
             Member member = new Member();
             member.setUsername("member1");
             member.setAge(10);
+
+            member.setTeam(team);
+
             em.persist(member);
 
             em.flush();  //영속성 컨텍스트의 쿼리를 날리고
             em.clear();  //영속성 컨텍스트를 비운다
 
-            List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+            String query = "select m from Member m left join m.team t on t.name = 'teamA'";
+            List<Member> result = em.createQuery(query, Member.class)
                     .getResultList();
-
-            MemberDTO memberDTO = result.get(0);
-            System.out.println("memberDTO.getUsername() = " + memberDTO.getUsername());
-            System.out.println("memberDTO.getAge() = " + memberDTO.getAge());
 
             tx.commit();
         } catch (Exception e) {
